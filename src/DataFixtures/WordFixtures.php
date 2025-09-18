@@ -41,6 +41,7 @@ class WordFixtures extends Fixture implements FixtureGroupInterface
             ['notion', 'noun', 'a belief or idea', ['She had a notion that he was lying.'], 'B2', ['thinking']],
             ['notion', 'noun', 'a belief or idea', ['She had a notion that he was lying.'], 'B2', ['thinking']],
             ['notion', 'noun', 'a belief or idea', ['She had a notion that he was lying.'], 'B2', ['thinking']],
+            ['notion', 'noun', 'a belief or idea', ['She had a notion that he was lying.'], 'B2', ['thinking']],
         ];
         foreach ($data as [$head,$pos,$def,$ex,$lvl,$tags]) {
             $w = new Word($head);
