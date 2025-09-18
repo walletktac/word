@@ -39,6 +39,7 @@ class WordFixtures extends Fixture implements FixtureGroupInterface
             ['sustain', 'verb', 'to keep something going over time', ['The pillars sustain the roof.'], 'B2', ['general']],
             ['widespread', 'adjective', 'found or distributed over a large area or number of people', ['The disease was widespread.'], 'B2', ['general']],
             ['notion', 'noun', 'a belief or idea', ['She had a notion that he was lying.'], 'B2', ['thinking']],
+            ['notion', 'noun', 'a belief or idea', ['She had a notion that he was lying.'], 'B2', ['thinking']],
         ];
         foreach ($data as [$head,$pos,$def,$ex,$lvl,$tags]) {
             $w = new Word($head);
