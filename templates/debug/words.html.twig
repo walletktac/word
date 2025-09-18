@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Words</title>
+    <style>
+        body{font-family:sans-serif; margin:2rem;}
+        table{border-collapse:collapse; width:100%;}
+        th,td{border:1px solid #ddd; padding:.5rem; vertical-align:top;}
+        th{background:#f7f7f7;}
+        code{white-space:pre-wrap;}
+    </style>
+</head>
+<body>
+<h1>Words (first 50)</h1>
+<table>
+    <thead>
+    <tr>
+        <th>ID</th><th>Headword</th><th>POS</th><th>Level</th>
+        <th>Definition</th><th>Examples</th><th>Tags</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for w in words %}
+        <tr>
+            <td>{{ w.id }}</td>
+            <td>{{ w.headword }}</td>
+            <td>{{ w.pos }}</td>
+            <td>{{ w.level }}</td>
+            <td>{{ w.definition }}</td>
+            <td><code>{{ w.examples|json_encode }}</code></td>
+            <td><code>{{ w.tags|json_encode }}</code></td>
+        </tr>
+    {% else %}
+        <tr><td colspan="7">Brak danych.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

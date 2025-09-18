@@ -1,0 +1,62 @@
+# config/services.yaml
+parameters:
+  openai_api_key: '%env(OPENAI_API_KEY)%'
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/**/Domain/Entity/'          # nowe encje w pakietach (np. Word/Domain/Entity)
+      - '../src/Kernel.php'
+
+  App\Word\Infrastructure\Persistence\Doctrine\WordDoctrineRepository: ~
+  App\Word\Domain\Repository\WordRepositoryInterface:
+    alias: App\Word\Infrastructure\Persistence\Doctrine\WordDoctrineRepository
+
+  App\Word\Infrastructure\Http\:
+    resource: '../src/Word/Infrastructure/Http/'
+    tags: ['controller.service_arguments']
+
+  App\DataFixtures\WordFixtures:
+    tags: ['doctrine.fixture.orm']
+
+  App\User\Infrastructure\Persistence\Doctrine\UserDoctrineRepository: ~
+  App\User\Domain\Repository\UserRepositoryInterface:
+      alias: App\User\Infrastructure\Persistence\Doctrine\UserDoctrineRepository
+
+  App\User\Infrastructure\Http\:
+    resource: '../src/User/Infrastructure/Http/'
+    tags: [ 'controller.service_arguments' ]
+
+  App\UserWordProgress\Infrastructure\Persistence\Doctrine\UserWordProgressRepository: ~
+  App\UserWordProgress\Domain\Repository\UserWordProgressRepositoryInterface:
+    alias: App\UserWordProgress\Infrastructure\Persistence\Doctrine\UserWordProgressRepository
+
+  App\UserAssessment\Infrastructure\Http\:
+    resource: '../src/UserAssessment/Infrastructure/Http/'
+    tags: [ 'controller.service_arguments' ]
+
+  App\UserAssessment\Infrastructure\OpenAI\OpenAiLevelEvaluator:
+    arguments:
+      $openAiApiKey: '%openai_api_key%'
+
+  App\UserAssessment\Infrastructure\OpenAI\OpenAiQuizGenerator:
+    arguments:
+      $openAiApiKey: '%openai_api_key%'
+
+  App\UserAssessment\Infrastructure\OpenAI\OpenAiQuizEvaluator:
+    arguments:
+      $openAiApiKey: '%openai_api_key%'
+
+  App\UserAssessment\Domain\Service\LevelEvaluatorInterface:
+    alias: App\UserAssessment\Infrastructure\OpenAI\OpenAiLevelEvaluator
+#    alias: App\UserAssessment\Infrastructure\OpenAI\FakeOpenAiLevelEvaluator
+
+  App\UserAssessment\Infrastructure\EventListener\LogUserAssessedListener:
+    tags:
+      - { name: kernel.event_listener, event: App\UserAssessment\Domain\Event\UserAssessedEvent }

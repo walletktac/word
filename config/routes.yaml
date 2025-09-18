@@ -1,0 +1,20 @@
+word_controllers:
+  resource: ../src/Word/Infrastructure/Http/
+  type: attribute
+
+user_controllers:
+  resource: ../src/User/Infrastructure/Http/
+  type: attribute
+
+word_user_controllers:
+  resource: ../src/UserWordProgress/Infrastructure/Http/
+  type: attribute
+
+user_assessment_controllers:
+  resource: ../src/UserAssessment/Infrastructure/Http/
+  type: attribute
+
+# Load all controllers from any Infrastructure/Http folder (alternatywnie)
+#infrastructure_controllers:
+#  resource: ../src/**/Infrastructure/Http/
+#  type: attribute
