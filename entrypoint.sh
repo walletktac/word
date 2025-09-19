@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-# parsowanie hosta i portu z DATABASE_URL
-DB_URL="${DATABASE_URL}"
-DB_HOST=$(printf "%s" "$DB_URL" | sed -E 's#^.+@([^:/]+).*$#\1#')
-DB_PORT=$(printf "%s" "$DB_URL" | sed -nE 's#^.+@[^:/]+:([0-9]+).*$#\1#p')
-[ -z "$DB_PORT" ] && DB_PORT=3306
+DB_HOST="${MYSQLHOST}"
+DB_PORT="${MYSQLPORT:-3306}"
+DB_USER="${MYSQLUSER:-root}"
+DB_PASS="${MYSQLPASSWORD}"
+DB_NAME="${MYSQLDATABASE:-railway}"
 
 echo "[entrypoint] waiting for DB at ${DB_HOST}:${DB_PORT}..."
 i=0
@@ -18,17 +18,17 @@ echo "[entrypoint] DB is reachable."
 
 # utwórz usera 'symfony' z hasłem 'symfony' (jeśli nie istnieje)
 echo "[entrypoint] ensuring symfony DB user exists..."
-mysql -h"$DB_HOST" -P"$DB_PORT" -uroot -p"$MYSQL_ROOT_PASSWORD" railway -e \
+mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" -e \
   "CREATE USER IF NOT EXISTS 'symfony'@'%' IDENTIFIED BY 'symfony'; \
-   GRANT ALL PRIVILEGES ON railway.* TO 'symfony'@'%'; \
+   GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO 'symfony'@'%'; \
    FLUSH PRIVILEGES;" || echo "[entrypoint] cannot create symfony user, maybe already exists"
 
-# nadpisz DATABASE_URL na symfony usera
-export DATABASE_URL="mysql://symfony:symfony@${DB_HOST}:${DB_PORT}/railway?charset=utf8mb4"
+# ustaw nowe DATABASE_URL
+export DATABASE_URL="mysql://symfony:symfony@${DB_HOST}:${DB_PORT}/${DB_NAME}?charset=utf8mb4"
 
-# testujemy połączenie przez doctrine
+echo "[entrypoint] testing doctrine connection..."
 if ! php bin/console doctrine:query:sql "SELECT 1" >/dev/null 2>&1; then
-  echo "[entrypoint] Doctrine cannot query DB. Check DATABASE_URL: $DATABASE_URL"
+  echo "[entrypoint] Doctrine cannot query DB. DATABASE_URL=$DATABASE_URL"
   exit 1
 fi
 
