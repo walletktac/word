@@ -1,37 +1,35 @@
 FROM php:8.3-fpm-bookworm
 
-# --- PHP + Nginx + Supervisor + deps ---
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends \
-        nginx supervisor git unzip \
+    apt-get install -y --no-install-recommends nginx supervisor git unzip \
         libicu-dev libzip-dev libpq-dev; \
     docker-php-ext-install intl pdo pdo_mysql opcache zip; \
     pecl install redis; docker-php-ext-enable redis; \
-    apt-get clean; rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*
 
-# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# PHP config
+ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini
 
 WORKDIR /var/www/backend
 
-# Instaluj vendory z cache
+# 1) Najpierw same pliki composera – dla cache warstw
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-progress --no-interaction
 
-# Kod aplikacji
+# 2) Instalacja BEZ uruchamiania skryptów (nie ma jeszcze bin/console)
+RUN composer install --no-dev --prefer-dist --no-progress --no-interaction --no-scripts
+
+# 3) Dopiero teraz cały kod aplikacji
 COPY . .
 
-# (opcjonalnie dla Symfony) niech się nie wywala jeśli brak cache w buildzie
-RUN APP_ENV=prod composer dump-autoload --optimize || true
+# 4) Post-copy: autoload + (opcjonalnie) cache warmup
+RUN APP_ENV=prod composer dump-autoload --optimize && \
+    mkdir -p var/cache var/log && \
+    chown -R www-data:www-data var
 
-# Nginx conf
+# Nginx + Supervisor
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Supervisor (odpali Nginx + PHP-FPM)
 COPY nginx/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
