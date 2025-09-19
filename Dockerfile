@@ -4,6 +4,7 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         nginx supervisor git unzip netcat-openbsd \
+        default-mysql-client \
         libicu-dev libzip-dev libpq-dev; \
     docker-php-ext-install intl pdo pdo_mysql opcache zip; \
     pecl install redis; docker-php-ext-enable redis; \
