@@ -19,7 +19,7 @@ echo "[entrypoint] DB is reachable."
 # utwórz usera 'symfony' z hasłem 'symfony' (jeśli nie istnieje)
 echo "[entrypoint] ensuring symfony DB user exists..."
 mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" "$DB_NAME" -e "
-    CREATE USER IF NOT EXISTS 'symfony'@'%' IDENTIFIED WITH mysql_native_password BY 'symfony';
+    CREATE USER IF NOT EXISTS 'symfony'@'%' IDENTIFIED WITH caching_sha2_password BY 'symfony';
     GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO 'symfony'@'%';
     FLUSH PRIVILEGES;
 " || echo "[entrypoint] cannot create symfony user, maybe already exists"
