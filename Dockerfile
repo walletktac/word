@@ -36,3 +36,8 @@ COPY nginx/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
 CMD ["supervisord","-n","-c","/etc/supervisor/conf.d/supervisord.conf"]
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+CMD ["/entrypoint.sh"]
+
