@@ -29,5 +29,12 @@ export DATABASE_URL="pgsql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NA
 echo "[entrypoint] running migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true
 
+if [ "$APP_ENV" = "dev" ] || [ "$LOAD_FIXTURES" = "1" ]; then
+  echo "[entrypoint] loading fixtures..."
+  php bin/console doctrine:fixtures:load --no-interaction --group=seed-users || true
+  php bin/console doctrine:fixtures:load --no-interaction --group=seed-words || true
+fi
+
+
 echo "[entrypoint] starting services..."
 exec supervisord -n -c /etc/supervisor/conf.d/supervisord.conf

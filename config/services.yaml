@@ -22,7 +22,8 @@ services:
     resource: '../src/Word/Infrastructure/Http/'
     tags: ['controller.service_arguments']
 
-  App\DataFixtures\WordFixtures:
+  App\DataFixtures\:
+    resource: '../src/DataFixtures/'
     tags: ['doctrine.fixture.orm']
 
   App\User\Infrastructure\Persistence\Doctrine\UserDoctrineRepository: ~
