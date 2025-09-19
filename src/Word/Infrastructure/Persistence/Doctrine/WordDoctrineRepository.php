@@ -45,26 +45,31 @@ final class WordDoctrineRepository extends ServiceEntityRepository implements Wo
 
         if ($q) {
             $qb->andWhere('LOWER(w.headword) LIKE :q OR LOWER(w.translation) LIKE :q')
-                ->setParameter('q', '%'.mb_strtolower($q).'%')
-            ;
+                ->setParameter('q', '%'.mb_strtolower($q).'%');
         }
+
         if ($level) {
-            $qb->andWhere('w.level = :level')->setParameter('level', $level);
+            $qb->andWhere('w.level = :level')
+                ->setParameter('level', $level);
         }
 
         $qb->orderBy('w.id', 'DESC');
 
-        $total = (int) (clone $qb)->select('COUNT(w.id)')->getQuery()->getSingleScalarResult();
+        // poprawka: resetujemy orderBy w klonie
+        $totalQb = clone $qb;
+        $total = (int) $totalQb
+            ->resetDQLPart('orderBy')
+            ->select('COUNT(w.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
 
         $items = $qb->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
-            ->getQuery()->getResult()
-        ;
+            ->getQuery()
+            ->getResult();
 
         /** @var list<Word> $items */
-        $items = array_values($items);
-
-        return ['items' => $items, 'total' => $total];
+        return ['items' => array_values($items), 'total' => $total];
     }
 
     public function add(Word $word): void

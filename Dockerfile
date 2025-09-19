@@ -37,4 +37,8 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
+
+RUN rm -f /etc/nginx/conf.d/*
+COPY nginx/default.conf /etc/nginx/templates/default.conf.template
+
 CMD ["/entrypoint.sh"]

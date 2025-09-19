@@ -75,19 +75,22 @@ final class UserDoctrineRepository extends ServiceEntityRepository implements Us
 
         if ($search) {
             $qb->andWhere('LOWER(u.email) LIKE :search OR LOWER(u.name) LIKE :search')
-                ->setParameter('search', '%'.mb_strtolower($search).'%')
-            ;
+                ->setParameter('search', '%'.mb_strtolower($search).'%');
         }
 
         $qb->orderBy('u.id', 'DESC');
 
-        $total = (clone $qb)->select('COUNT(u.id)')->getQuery()->getSingleScalarResult();
+        $totalQb = clone $qb;
+        $total = $totalQb
+            ->resetDQLPart('orderBy')
+            ->select('COUNT(u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
 
         $items = $qb->setFirstResult(($page - 1) * $perPage)
             ->setMaxResults($perPage)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
 
         return ['items' => $items, 'total' => (int) $total];
     }
