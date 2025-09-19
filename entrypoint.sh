@@ -22,6 +22,9 @@ if ! php bin/console doctrine:query:sql "SELECT 1" >/dev/null 2>&1; then
   exit 1
 fi
 
+echo "[entrypoint] testing PHP PDO..."
+php -r "var_dump(new PDO(getenv('DATABASE_URL')));"
+
 echo "[entrypoint] running migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true
 
