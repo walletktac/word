@@ -1,13 +1,26 @@
 #!/bin/sh
 set -e
 
-echo "[entrypoint] waiting for DB..."
+# parsowanie hosta i portu z DATABASE_URL
+DB_URL="${DATABASE_URL}"
+DB_HOST=$(printf "%s" "$DB_URL" | sed -E 's#^.+@([^:/]+).*$#\1#')
+DB_PORT=$(printf "%s" "$DB_URL" | sed -nE 's#^.+@[^:/]+:([0-9]+).*$#\1#p')
+[ -z "$DB_PORT" ] && DB_PORT=3306
+
+echo "[entrypoint] waiting for DB at ${DB_HOST}:${DB_PORT}..."
 i=0
-until php bin/console doctrine:query:sql "SELECT 1" >/dev/null 2>&1; do
+until nc -z "$DB_HOST" "$DB_PORT"; do
   i=$((i+1))
-  [ "$i" -ge 30 ] && echo "[entrypoint] DB not ready, giving up" && exit 1
+  [ "$i" -ge 60 ] && echo "[entrypoint] DB not ready after 120s, giving up" && exit 1
   sleep 2
 done
+echo "[entrypoint] DB is reachable."
+
+# testujemy połączenie przez doctrine (czy credsy działają)
+if ! php bin/console doctrine:query:sql "SELECT 1" >/dev/null 2>&1; then
+  echo "[entrypoint] Doctrine cannot query DB. Check DATABASE_URL: $DATABASE_URL"
+  exit 1
+fi
 
 echo "[entrypoint] running migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true
