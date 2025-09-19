@@ -31,8 +31,8 @@ php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migratio
 
 if [ "$APP_ENV" = "dev" ] || [ "$LOAD_FIXTURES" = "1" ]; then
   echo "[entrypoint] loading fixtures..."
-  php bin/console doctrine:fixtures:load --no-interaction --group=seed-users || true
-  php bin/console doctrine:fixtures:load --no-interaction --group=seed-words || true
+  php bin/console doctrine:fixtures:load --no-interaction --group=seed-users --append || true
+  php bin/console doctrine:fixtures:load --no-interaction --group=seed-words --append || true
 fi
 
 
