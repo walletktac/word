@@ -4,7 +4,8 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
         nginx supervisor git unzip netcat-openbsd \
-        libicu-dev libzip-dev libpq-dev postgresql-client; \
+        libicu-dev libzip-dev libpq-dev postgresql-client \
+        gettext-base; \
     docker-php-ext-install intl pdo pdo_pgsql opcache zip; \
     pecl install redis; docker-php-ext-enable redis; \
     rm -rf /var/lib/apt/lists/*
@@ -27,18 +28,16 @@ RUN APP_ENV=prod composer dump-autoload --optimize && \
     mkdir -p var/cache var/log && \
     chown -R www-data:www-data var
 
-# Nginx conf (czyścimy stare i wgrywamy nasz)
+# Nginx conf (czyścimy stare i wgrywamy nasze)
 RUN rm -f /etc/nginx/conf.d/*
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY nginx/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY nginx/default.conf /etc/nginx/templates/default.conf.template
 
 # Entrypoint
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
-
-RUN rm -f /etc/nginx/conf.d/*
-COPY nginx/default.conf /etc/nginx/templates/default.conf.template
 
 CMD ["/entrypoint.sh"]
