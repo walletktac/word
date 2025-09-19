@@ -16,14 +16,21 @@ until nc -z "$DB_HOST" "$DB_PORT"; do
 done
 echo "[entrypoint] DB is reachable."
 
-# testujemy połączenie przez doctrine (czy credsy działają)
+# utwórz usera 'symfony' z hasłem 'symfony' (jeśli nie istnieje)
+echo "[entrypoint] ensuring symfony DB user exists..."
+mysql -h"$DB_HOST" -P"$DB_PORT" -uroot -p"$MYSQL_ROOT_PASSWORD" railway -e \
+  "CREATE USER IF NOT EXISTS 'symfony'@'%' IDENTIFIED BY 'symfony'; \
+   GRANT ALL PRIVILEGES ON railway.* TO 'symfony'@'%'; \
+   FLUSH PRIVILEGES;" || echo "[entrypoint] cannot create symfony user, maybe already exists"
+
+# nadpisz DATABASE_URL na symfony usera
+export DATABASE_URL="mysql://symfony:symfony@${DB_HOST}:${DB_PORT}/railway?charset=utf8mb4"
+
+# testujemy połączenie przez doctrine
 if ! php bin/console doctrine:query:sql "SELECT 1" >/dev/null 2>&1; then
   echo "[entrypoint] Doctrine cannot query DB. Check DATABASE_URL: $DATABASE_URL"
   exit 1
 fi
-
-echo "[entrypoint] testing PHP PDO..."
-php -r "var_dump(new PDO(getenv('DATABASE_URL')));"
 
 echo "[entrypoint] running migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true
