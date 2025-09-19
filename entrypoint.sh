@@ -26,15 +26,6 @@ echo "[entrypoint] DB is reachable."
 # Składamy DATABASE_URL dla Doctrine (PDO PgSQL)
 export DATABASE_URL="pgsql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
-echo "[entrypoint] running migrations..."
-php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration || true
-
-if [ "$APP_ENV" = "dev" ] || [ "$LOAD_FIXTURES" = "1" ]; then
-  echo "[entrypoint] loading fixtures..."
-  php bin/console doctrine:fixtures:load --no-interaction --group=seed-users --append || true
-  php bin/console doctrine:fixtures:load --no-interaction --group=seed-words --append || true
-fi
-
 
 echo "[entrypoint] starting services..."
 envsubst '$PORT' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf
