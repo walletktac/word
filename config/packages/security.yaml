@@ -16,7 +16,7 @@ security:
 
     # tylko logowanie po JSON
     login:
-      pattern: ^/api/auth/login
+      pattern: ^/api/auth/login$
       stateless: true
       provider: app_user_provider
       json_login:
